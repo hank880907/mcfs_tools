@@ -43,3 +43,9 @@ class StreamAbstract(ABC):
                 break
             time.sleep(0.001)
         return False
+
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
