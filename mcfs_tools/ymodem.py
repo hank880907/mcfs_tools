@@ -6,12 +6,36 @@ from .stream import StreamAbstract
 
 import logging
 import time
-import crc
 from tqdm import tqdm
 from typing import List
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 Logger = logging.getLogger(__name__)
+
+
+def update_crc16(pre_crc: int, byte: int) -> int:
+    crc = pre_crc
+    in_byte = byte | 0x100
+    while True:
+        crc <<= 1
+        in_byte <<= 1
+        if in_byte & 0x100:
+            crc += 1
+        if crc & 0x10000:
+            crc ^= 0x1021
+
+        if (in_byte & 0x10000):
+            break
+
+    return crc & 0xffff    
+
+def cal_crc16(data: bytes) -> int:
+    crc = 0
+    for byte in data:
+        crc = update_crc16(crc, byte)
+    crc = update_crc16(crc, 0)
+    crc = update_crc16(crc, 0)
+    return crc & 0xffff
 
 
 class Ymodem:
@@ -32,8 +56,7 @@ class Ymodem:
         self.retransmission_count = 0
 
     def compute_crc(self, data_bytes) -> int:
-        calculator = crc.Calculator(crc.Crc16.XMODEM)
-        checksum = calculator.checksum(data_bytes)
+        checksum = cal_crc16(data_bytes) & 0xffff
         return checksum
 
     def parse_data_packet(self, packet_number, data) -> bytes:
@@ -103,7 +126,11 @@ class Ymodem:
             if timeout > 0 and time.time() - start_time > timeout:
                 Logger.debug("Timeout while waiting for response.")
                 return False
-        
+
+            # clear the receive buffer before sending the packet.
+            while self.stream.recv_byte() != -1:
+                pass
+
             self.stream.send(packet)
             response = self.stream.wait_recv_byte(timeout)
             if response == Ymodem.ACK:
@@ -183,7 +210,7 @@ class Ymodem:
                 if chunk_num > total_chunks:
                     break
 
-                packet = self.parse_data_packet(chunk_num, file_data[chunk_num * chunk_size: (chunk_num + 1) * chunk_size])
+                packet = self.parse_data_packet(chunk_num + 1, file_data[chunk_num * chunk_size: (chunk_num + 1) * chunk_size])
 
                 if not self.serve_packet(packet):
                     Logger.error("Failed to send packet.")

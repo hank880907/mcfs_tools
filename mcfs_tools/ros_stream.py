@@ -34,7 +34,7 @@ class ROSSocketCanAdapter:
         ros_msg.is_extended = msg.is_extended_id
         ros_msg.is_rtr = msg.is_remote_frame
         ros_msg.is_error = msg.is_error_frame
-        time.sleep(0.002)
+        time.sleep(0.001)
         self.tx.publish(ros_msg)
 
 
