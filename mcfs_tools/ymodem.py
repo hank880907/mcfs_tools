@@ -114,13 +114,13 @@ class Ymodem:
                 Logger.debug("Received NAK.")
             elif response == Ymodem.CAN:
                 cancel_packet_count = 1
-                for i in range(4):
+                for i in range(1):
                     response = self.stream.wait_recv_byte(0.1)
                     if response == Ymodem.CAN:
                         cancel_packet_count += 1
                     else:
                         break
-                if cancel_packet_count == 5:
+                if cancel_packet_count == 2:
                     raise ConnectionError("Transfer canceled by the receiver.")
                 
             elif response == -1:
@@ -263,7 +263,6 @@ class Ymodem:
 
         file_data = bytearray()
         chunk_num = 0
-        recieved_bytes = 0
 
         self.stream.send(bytes([Ymodem.C])) # send the second handshake
 
@@ -282,16 +281,24 @@ class Ymodem:
 
                 if packet[0] == Ymodem.CAN:
                     cancel_packet_count = 1
-                    for i in range(4):
+                    for i in range(1):
                         packet = self.try_recv_packet(0.1)
                         if packet[0] == Ymodem.CAN:
                             cancel_packet_count += 1
                         else:
                             break
-                    if cancel_packet_count == 5:
+                    if cancel_packet_count == 2:
                         raise ConnectionError("Transfer canceled by the sender.")
+                    else:
+                        continue
 
                 if packet[0] == Ymodem.SOH or packet[0] == Ymodem.STX:
+
+                    if packet[1] != chunk_num % 256:
+                        Logger.debug(f"Invalid chunk number. Expected: {chunk_num}, Received: {packet[1]}. NAK sent.")
+                        self.stream.send(bytes([Ymodem.NAK]))
+                        continue
+                    
                     file_data.extend(packet[3:-2])
                     self.stream.send(bytes([Ymodem.ACK]))
                     Logger.debug(f"Received chunk {chunk_num}. ACK sent.")
@@ -308,4 +315,4 @@ class Ymodem:
         return file_data
     
     def cancel_transfer(self):
-        self.stream.send(bytes([Ymodem.CAN]*5))
+        self.stream.send(bytes([Ymodem.CAN]*2))
