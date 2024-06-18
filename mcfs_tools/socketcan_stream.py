@@ -9,7 +9,7 @@ class SocketCanStream(StreamAbstract):
 
     OTA_TRIGGER = 0x14
 
-    def __init__(self, motor_id, channel = "can0", custom_bus = None) -> None:
+    def __init__(self, motor_id, channel = "can0", custom_bus = None, **kwarg) -> None:
         super().__init__()
         self.motor_id = motor_id
         self.recv_queue = Queue()

@@ -7,7 +7,7 @@ import random
 
 class TCPClientStream(StreamAbstract):
     
-        def __init__(self, ip: str, port: int) -> None:
+        def __init__(self, ip: str, port: int, **kwarg) -> None:
             super().__init__()
             self.ip = ip
             self.port = port
@@ -61,7 +61,7 @@ class TCPClientStream(StreamAbstract):
 
 class TCPServerStream(StreamAbstract):
 
-    def __init__(self, port: int) -> None:
+    def __init__(self, port: int, **kwarg) -> None:
         super().__init__()
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

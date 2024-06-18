@@ -40,6 +40,6 @@ class ROSSocketCanAdapter:
 
 class ROSStream(SocketCanStream):
 
-    def __init__(self, motor_id: int, channel: str) -> None:
+    def __init__(self, motor_id: int, channel: str, **kwarg) -> None:
         super().__init__(motor_id, channel, custom_bus=ROSSocketCanAdapter(motor_id, rx_topic=channel + "_rx", tx_topic=channel + "_tx"))
         time.sleep(0.3)
