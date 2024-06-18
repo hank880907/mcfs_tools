@@ -15,6 +15,7 @@ if __name__ == "__main__":
     argparser.add_argument('--verbose', '-v', action='count', default=0)
     # argparser.add_argument('-b', "--bar", action="store_true", help="Show progress bar")
     argparser.add_argument('-hb', "--hide_bar", action="store_true", help="Hide progress bar")
+    argparser.add_argument('-c', "--channel", help="CAN channel", default="can0")
 
     args, unknown = argparser.parse_known_args()
 
@@ -29,6 +30,7 @@ if __name__ == "__main__":
     stream_name = args.stream_type
     motor_id = int(args.id)
     show_progress = True
+    channel = args.channel
 
     if not filename.endswith(".bin"):
         print("Invalid file extension. Only .bin files are supported.")
@@ -44,7 +46,7 @@ if __name__ == "__main__":
     print(f"Sending {filename} with {len(file_bytes)} bytes to motor {motor_id}")
     
     ret = False
-    with make_stream(stream_name, motor_id=motor_id) as stream:
+    with make_stream(stream_name, motor_id=motor_id, channel=channel) as stream:
 
         try:
             stream.initiate_ota()

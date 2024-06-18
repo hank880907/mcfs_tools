@@ -68,7 +68,7 @@ def make_stream(name: str, **kwarg) -> StreamAbstract:
     stream_dict = {}
     streams = all_streams(StreamAbstract)
     for s in streams:
-        stream_dict[s.__name__.lower().rstrip("stream")] = s
+        stream_dict[s.__name__.lower().replace("stream", "")] = s
 
     if name not in stream_dict:
         raise ValueError("Invalid stream name: ", name)
