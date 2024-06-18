@@ -64,7 +64,7 @@ def all_streams(cls):
 
 def make_stream(name: str, **kwarg) -> StreamAbstract:
 
-    name = name.lower().rstrip("stream")
+    name = name.lower().replace("stream", "")
     stream_dict = {}
     streams = all_streams(StreamAbstract)
     for s in streams:
@@ -74,3 +74,6 @@ def make_stream(name: str, **kwarg) -> StreamAbstract:
         raise ValueError("Invalid stream name: ", name)
 
     return stream_dict[name](**kwarg)
+
+def get_stream_names():
+    return [s.__name__.lower().replace("stream", "") for s in all_streams(StreamAbstract)]

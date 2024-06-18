@@ -6,6 +6,16 @@ Organization: Seedspider Ltd, New Zealand
 """
 
 from .ymodem import Ymodem
-from .stream import StreamAbstract, make_stream
+from .stream import StreamAbstract, make_stream, get_stream_names
+import glob
 
-from .socketcan_stream import SocketCanStream
+# load all the stream classes
+import importlib
+import os
+for file in glob.glob(os.path.dirname(__file__)+"/*stream.py"):
+    print(file)
+    module_name = file.split("/")[-1].split(".")[0]
+    try:
+        importlib.import_module(f"mcfs_tools.{module_name}")
+    except Exception as e:
+        pass

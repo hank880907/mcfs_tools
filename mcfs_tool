@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from mcfs_tools import Ymodem, make_stream
+from mcfs_tools import Ymodem, make_stream, get_stream_names
 import argparse
 import os
 from mcfs_tools.ymodem import Logger
@@ -11,7 +11,7 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description="Firmware update tool for Myactuator motor")
     argparser.add_argument("filename", help="Firmware file to upload")
     argparser.add_argument("--id", help="Motor ID", default="0")
-    argparser.add_argument("--stream_type", help="", default="socketcan")
+    argparser.add_argument("--stream_type", help=f"Avaliable stream types: {', '.join(get_stream_names())}", default="socketcan")
     argparser.add_argument('--verbose', '-v', action='count', default=0)
     # argparser.add_argument('-b', "--bar", action="store_true", help="Show progress bar")
     argparser.add_argument('-hb', "--hide_bar", action="store_true", help="Hide progress bar")
