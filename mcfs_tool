@@ -13,7 +13,8 @@ if __name__ == "__main__":
     argparser.add_argument("--id", help="Motor ID", default="0")
     argparser.add_argument("--stream_type", help="", default="socketcan")
     argparser.add_argument('--verbose', '-v', action='count', default=0)
-    argparser.add_argument('-b', "--bar", action="store_true", help="Show progress bar")
+    # argparser.add_argument('-b', "--bar", action="store_true", help="Show progress bar")
+    argparser.add_argument('-hb', "--hide_bar", action="store_true", help="Hide progress bar")
 
     args, unknown = argparser.parse_known_args()
 
@@ -27,7 +28,7 @@ if __name__ == "__main__":
     filename: str = args.filename
     stream_name = args.stream_type
     motor_id = int(args.id)
-    show_progress = args.bar
+    show_progress = True
 
     if not filename.endswith(".bin"):
         print("Invalid file extension. Only .bin files are supported.")

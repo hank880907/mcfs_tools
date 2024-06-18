@@ -6,4 +6,4 @@ Author: Hank Wu
 
 Update firmware:
 
-```mcfs_tool filename.bin -b --id 0```
+```mcfs_tool filename.bin --id 0```
