@@ -24,10 +24,14 @@ if __name__ == "__main__":
     else:
         Logger.setLevel(level=logging.WARNING)
 
-    filename = args.filename
+    filename: str = args.filename
     stream_name = args.stream_type
     motor_id = int(args.id)
     show_progress = args.bar
+
+    if not filename.endswith(".bin"):
+        print("Invalid file extension. Only .bin files are supported.")
+        exit(1)
 
     if not os.path.exists(filename):
         print("File not found: %s" % filename)
