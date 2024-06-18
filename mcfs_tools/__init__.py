@@ -13,7 +13,6 @@ import glob
 import importlib
 import os
 for file in glob.glob(os.path.dirname(__file__)+"/*stream.py"):
-    print(file)
     module_name = file.split("/")[-1].split(".")[0]
     try:
         importlib.import_module(f"mcfs_tools.{module_name}")
