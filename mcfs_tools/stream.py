@@ -22,6 +22,13 @@ class StreamAbstract(ABC):
         pass
 
 
+    def initiate_ota(self) -> None:
+        """
+        Initiate the OTA process.
+        """
+        pass
+
+
     def wait_recv_byte(self, timeout = 0.1) -> int:
         start_time = time.time()
         while True:
@@ -49,3 +56,21 @@ class StreamAbstract(ABC):
     
     def __exit__(self, exc_type, exc_value, traceback):
         pass
+
+
+def all_streams(cls):
+    return set(cls.__subclasses__()).union(
+        [s for c in cls.__subclasses__() for s in all_streams(c)])
+
+def make_stream(name: str, **kwarg) -> StreamAbstract:
+
+    name = name.lower().rstrip("stream")
+    stream_dict = {}
+    streams = all_streams(StreamAbstract)
+    for s in streams:
+        stream_dict[s.__name__.lower().rstrip("stream")] = s
+
+    if name not in stream_dict:
+        raise ValueError("Invalid stream name: ", name)
+
+    return stream_dict[name](**kwarg)

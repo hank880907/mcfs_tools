@@ -1,0 +1,69 @@
+#!/usr/bin/python3
+
+from mcfs_tools import Ymodem, make_stream
+import argparse
+import os
+from mcfs_tools.ymodem import Logger
+import logging
+
+if __name__ == "__main__":
+
+    argparser = argparse.ArgumentParser(description="Firmware update tool for Myactuator motor")
+    argparser.add_argument("filename", help="Firmware file to upload")
+    argparser.add_argument("--id", help="Motor ID", default="0")
+    argparser.add_argument("--stream_type", help="", default="socketcan")
+    argparser.add_argument('--verbose', '-v', action='count', default=0)
+    argparser.add_argument('-b', "--bar", action="store_true", help="Show progress bar")
+
+    args, unknown = argparser.parse_known_args()
+
+    if args.verbose == 1:
+        Logger.setLevel(level=logging.INFO)
+    elif args.verbose >= 2:
+        Logger.setLevel(level=logging.DEBUG)
+    else:
+        Logger.setLevel(level=logging.WARNING)
+
+    filename = args.filename
+    stream_name = args.stream_type
+    motor_id = int(args.id)
+    show_progress = args.bar
+
+    if not os.path.exists(filename):
+        print("File not found: %s" % filename)
+        exit(1)
+
+    with open(filename, "rb") as f:
+        file_bytes = f.read()
+
+    print(f"Sending {filename} with {len(file_bytes)} bytes to motor {motor_id}")
+    
+    ret = False
+    with make_stream(stream_name, motor_id=motor_id) as stream:
+
+        try:
+            stream.initiate_ota()
+            protocol = Ymodem(stream)
+            ret = protocol.send(filename, file_bytes, show_progress)
+        except KeyboardInterrupt:
+            protocol.cancel_transfer()
+            print("Transfer canceled.")
+            exit(0)
+        except ConnectionError as e:
+            print("Connection error: ", e)
+            exit(0)
+
+        except Exception as e:
+            print("Error: ", e)
+            exit(1)
+    
+    
+    if not ret:
+        print("failed to send file")
+        exit(1)
+    
+    print("File transfer completed. Total retransmissions: ", protocol.retransmission_count)
+    exit(0)
+
+
+

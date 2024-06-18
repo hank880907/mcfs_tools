@@ -1,6 +1,9 @@
 from .stream import StreamAbstract
 import can
 from queue import Queue
+import time
+from logzero import logger
+
 
 class SocketCanStream(StreamAbstract):
 
@@ -37,17 +40,32 @@ class SocketCanStream(StreamAbstract):
         return -1
     
     
-    def send(self, data: bytes) -> None:
+    def send(self, data: bytes, timeout = 1.0) -> None:
         chunk_size = 8
         num_chunks = (len(data) + chunk_size - 1) // chunk_size
         for i in range(num_chunks):
             chunk = data[i * chunk_size : (i + 1) * chunk_size]
             msg = can.Message(arbitration_id=self.motor_id << 6 | 0x1F << 1 | 1, data=chunk, dlc=len(chunk), is_extended_id=False, is_remote_frame=False)
-            self.can_bus.send(msg)
+
+            start_time = time.time()
+            while True:
+
+                if timeout > 0 and time.time() - start_time > timeout:
+                    raise TimeoutError("Timeout sending message")
+                
+                try:
+                    self.can_bus.send(msg)
+                    break
+                except can.CanOperationError as e:
+                    # print("Error sending message: retrying", e)
+                    time.sleep(0.05)
+                    continue
+            
 
 
     def initiate_ota(self):
         msg = can.Message(arbitration_id=self.motor_id << 6 | SocketCanStream.OTA_TRIGGER << 1 | 1, data=bytes([0]), dlc=1, is_extended_id=False, is_remote_frame=False)
+        logger.debug(f"Sending OTA trigger.")
         self.can_bus.send(msg)
 
     def wait_for_ota(self):

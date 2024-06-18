@@ -6,4 +6,6 @@ Organization: Seedspider Ltd, New Zealand
 """
 
 from .ymodem import Ymodem
-from .stream import StreamAbstract
+from .stream import StreamAbstract, make_stream
+
+from .socketcan_stream import SocketCanStream

@@ -5,12 +5,14 @@ This program is used to update the firmware of the MyActuator using Ymodem proto
 from .stream import StreamAbstract
 
 import logging
+import logzero
 import time
 from tqdm import tqdm
-from typing import List
 
-logging.basicConfig(level=logging.INFO, format='%(message)s')
-Logger = logging.getLogger(__name__)
+log_format = "%(color)s[%(levelname)s]%(end_color)s %(message)s"
+formatter = logzero.LogFormatter(fmt=log_format)
+logzero.formatter(formatter)
+Logger = logzero.logger
 
 
 def update_crc16(pre_crc: int, byte: int) -> int:
@@ -52,6 +54,10 @@ class Ymodem:
     DATA_LEN = {SOH: 128, STX: 1024}
 
     def __init__(self, stream: StreamAbstract) -> None:
+
+        if not isinstance(stream, StreamAbstract):
+            raise TypeError("stream must be an instance of StreamAbstract.")
+        
         self.stream: StreamAbstract = stream
         self.retransmission_count = 0
 
@@ -185,7 +191,7 @@ class Ymodem:
 
         self.retransmission_count = 0
 
-        if not self.wait_for_request(5.0):
+        if not self.wait_for_request(1.0):
             Logger.error("Timeout while waiting for the request.")
             return False
         
