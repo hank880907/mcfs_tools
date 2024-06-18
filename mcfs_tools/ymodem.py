@@ -2,7 +2,7 @@
 This program is used to update the firmware of the MyActuator using Ymodem protocol.
 """
 
-from .stream import StreamAbstract
+from .streams import StreamAbstract
 
 import logging
 import logzero
